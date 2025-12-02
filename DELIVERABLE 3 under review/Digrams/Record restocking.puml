@@ -1,0 +1,53 @@
+@startuml
+actor "Warehouse Staff" as WS
+participant "Inventory System" as S
+
+WS -> S: scanPurchaseOrder(poNumber)
+activate S
+S --> WS: poDetails, expectedItems
+note right of S
+PODetails include:
+- poNumber
+- productID
+- quantity
+end note
+
+WS -> S: startReceivingProcess(poNumber)
+
+loop For each received item
+    WS -> S: scanItemBarcode(productID)
+    activate S
+    S --> WS: productDetails, expectedQty
+
+    WS -> S: confirmReceivedQuantity(productID, receivedQty, condition)
+
+    alt receivedQty > 0
+        S -> S: updateInventoryLevel(productID, receivedQty)
+        S -> S: updatePOReceivedQuantity(poNumber, productID, receivedQty)
+    else receivedQty == 0
+        S -> S: ignoreItem()
+    else receivedQty < expectedQty
+        S -> S: flagShortShipment(poNumber, productID, shortageQty)
+    end
+    deactivate S
+end
+
+WS -> S: completeReceivingProcess(poNumber)
+activate S
+
+S -> S: checkIfPOFullyReceived(poNumber)
+
+alt PO fully received
+    S -> S: closePurchaseOrder(poNumber)
+    S -> S: clearLowStockAlerts(relatedProducts)
+    S --> WS: confirmation("PO Closed")
+else PO partially received
+    S -> S: updatePOStatus("Partially Received")
+    S --> WS : updatePOStatus ("Partially Received")
+end
+
+S --> WS: receiptSummary
+S --> WS: confirmInventoryUpdated(updatedStockLevels)
+deactivate S
+
+@enduml
