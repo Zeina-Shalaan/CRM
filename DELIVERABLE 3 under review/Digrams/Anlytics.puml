@@ -1,0 +1,33 @@
+@startuml
+actor "Sales Team Member" as STM
+participant "System" as S
+
+STM -> S: requestSalesDashboard()
+activate S
+
+S -> S: fetchRealTimeSalesData()
+S -> S: calculateKPIs()
+S -> S: retrieveTopSellingProducts()
+S -> S: retrieveLowPerformingProducts()
+
+S --> STM: return salesDashboardData
+deactivate S
+@enduml
+====lol===
+@startuml
+actor "Senior Manager" as SM
+participant "Analytics System" as S
+
+SM -> S: requestInventoryReport(filters)
+activate S
+
+S -> S: validateFilters(filters)
+S -> S: fetchInventoryData(filters)
+S -> S: computeStockTrends()
+S -> S: calculateRestockingStats()
+S -> S: generateChartsAndSummary()
+
+S --> SM: return inventoryReport
+deactivate S
+
+@enduml
